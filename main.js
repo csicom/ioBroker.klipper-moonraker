@@ -214,7 +214,8 @@ class KlipperMoonraker extends utils.Adapter {
 
         // Reagiere auf Pong-Antworten vom Server
         ws.on('pong', () => {
-            this.log.debug('Pong received from server');
+            this.log.info('✓ Pong received from server - connection alive');
+            this.clearTimeout(this.pingTimeout);
         });
 
         // Connection successfully open, handle routine to initiates all objects and states
