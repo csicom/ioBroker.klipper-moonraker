@@ -716,14 +716,14 @@ class KlipperMoonraker extends utils.Adapter {
             // Set value to state including expiration time
             if (value !== null && value !== undefined) {
                 // Check if value should be rounded, if yes execute
-                if (typeof value === 'string') {
-                    const parsed = parseFloat(value);
-                    if (Number.isNaN(parsed)) {
-                        this.log.warn(`Cannot round non-numeric string "${value}"`);
-                    } else {
-                        value = parsed.toString();
-                    }
-                }
+                // if (typeof value === 'string') {
+                //     const parsed = parseFloat(value);
+                //     if (Number.isNaN(parsed)) {
+                //         this.log.warn(`Cannot round non-numeric string "${value}"`);
+                //     } else {
+                //         value = parsed.toString();
+                //     }
+                // }
                 if (typeof value === 'number') {
                     if (roundingOneDigit) {
                         const roundedValue = rondOneDigit(value, this);

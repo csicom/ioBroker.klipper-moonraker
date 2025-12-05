@@ -28,8 +28,8 @@ https://github.com/th33xitus/kiauh
     Placeholder for the next version (at the beginning of the line):
     ### __WORK IN PROGRESS__
 -->
-### 0.1.2 (2025-12-05)
-*(csicom) add useSpoolman configuration option
+### WORK IN PROGRESS
+* (csicom) add useSpoolman configuration option
 
 ### 0.1.1 (2025-05-07)
 * (@foxriver76) detect stale connections
