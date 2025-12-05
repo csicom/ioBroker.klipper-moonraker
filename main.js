@@ -192,14 +192,17 @@ class KlipperMoonraker extends utils.Adapter {
             wsUrl += `?token=${this.oneShotToken}`;
         }
 
-        /** Check that we receive a ping request in time */
+        /** Check that we receive a pong response in time */
         const heartbeat = () => {
-            this.log.info(JSON.stringify(this.pingTimeout));
             if (this.pingTimeout !== undefined) {
                 this.clearTimeout(this.pingTimeout);
             }
-            this.log.debug('Heartbeat received');
+            this.log.debug('Heartbeat - sending ping');
 
+            // Sende aktiv einen Ping
+            ws.ping();
+
+            // Setze Timeout für fehlende Pong-Antwort
             this.pingTimeout = this.setTimeout(() => {
                 this.log.error('No heartbeat received in time');
                 ws.terminate();
@@ -211,7 +214,10 @@ class KlipperMoonraker extends utils.Adapter {
             rejectUnauthorized: !this.config.useSsl,
         });
 
-        ws.on('ping', heartbeat);
+        // Reagiere auf Pong-Antworten vom Server
+        ws.on('pong', () => {
+            this.log.debug('Pong received from server');
+        });
 
         // Connection successfully open, handle routine to initiates all objects and states
         ws.on('open', () => {
@@ -219,7 +225,16 @@ class KlipperMoonraker extends utils.Adapter {
             this.setState('info.connection', true, true);
             connectionState = true;
 
+            // Starte den ersten Heartbeat und wiederhole ihn regelmäßig
             heartbeat();
+            const heartbeatInterval = this.setInterval(() => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    heartbeat();
+                }
+            }, this.PING_INTERVAL);
+
+            // Speichere Interval-ID zum Aufräumen
+            ws.heartbeatInterval = heartbeatInterval;
 
             // Get printer basic information
             ws.send(
@@ -336,6 +351,9 @@ class KlipperMoonraker extends utils.Adapter {
         // Handle closure of socket connection, try to connect again in 10seconds (if adapter enabled)
         ws.on('close', () => {
             this.clearTimeout(this.pingTimeout);
+            if (ws.heartbeatInterval) {
+                this.clearInterval(ws.heartbeatInterval);
+            }
 
             this.log.info(`Connection closed`);
             this.setState('info.connection', false, true);
