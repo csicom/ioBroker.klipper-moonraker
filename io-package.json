@@ -153,7 +153,8 @@
     "useSsl": false,
     "auth": false,
     "password": "",
-    "user": ""
+    "user": "",
+    "useSpoolman": false
   },
   "protectedNative": [
     "user",

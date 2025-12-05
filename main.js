@@ -20,7 +20,7 @@ const https = require('node:https');
 
 class KlipperMoonraker extends utils.Adapter {
     /**
-     * @param {Partial<utils.AdapterOptions>} [options]
+     * @param {Partial<utils.AdapterOptions>} [options] - Adapter options to configure the instance.
      */
     constructor(options) {
         super({
@@ -49,7 +49,7 @@ class KlipperMoonraker extends utils.Adapter {
         /** List of config definitions for subscription of events */
         this.subscribeMethods = {};
         /** Timeout method if no pong received in time */
-        this.pingTimeout = null;
+        this.pingTimeout = undefined;
         /** Check for ping every X ms */
         this.PING_INTERVAL = 30_000;
         this.axios = axios.create();
@@ -194,11 +194,12 @@ class KlipperMoonraker extends utils.Adapter {
 
         /** Check that we receive a ping request in time */
         const heartbeat = () => {
-            this.clearTimeout(this.pingTimeout);
-
+            if (this.pingTimeout !== undefined) {
+                this.clearTimeout(this.pingTimeout);
+            }
             this.log.debug('Heartbeat received');
 
-            this.pingTimeout = setTimeout(() => {
+            this.pingTimeout = this.setTimeout(() => {
                 this.log.error('No heartbeat received in time');
                 ws.terminate();
             }, this.PING_INTERVAL);
@@ -229,14 +230,15 @@ class KlipperMoonraker extends utils.Adapter {
             );
 
             // Get active spool
-            ws.send(
-                JSON.stringify({
-                    jsonrpc: '2.0',
-                    method: 'server.spoolman.get_spool_id',
-                    id: 'printer.spoolID',
-                }),
-            );
-
+            if (this.config.useSpoolman) {
+                ws.send(
+                    JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'server.spoolman.get_spool_id',
+                        id: 'printer.spoolID',
+                    }),
+                );
+            }
             // Call update for all methods
             this.getAvailableMethods();
         });
@@ -246,8 +248,10 @@ class KlipperMoonraker extends utils.Adapter {
             const errorOutput = data => {
                 this.log.debug(`Unexpected message received ${JSON.stringify(data)}`);
             };
+            // RawData sicher in String wandeln
+            const dataStr = typeof data === 'string' ? data : data.toString('utf8');
 
-            const rpc_data = JSON.parse(data);
+            const rpc_data = JSON.parse(dataStr) || {};
 
             // Handle error message and return function
             if (rpc_data.error) {
@@ -383,7 +387,7 @@ class KlipperMoonraker extends utils.Adapter {
     /**
      * Get the API base url based on the configuration
      *
-     * @returns {string}
+     * @returns {string} - The base URL for the API
      */
     getApiBaseUrl() {
         return `${this.config.useSsl ? 'https' : 'http'}://${this.config.klipperIP}:${this.config.klipperPort}`;
@@ -496,7 +500,7 @@ class KlipperMoonraker extends utils.Adapter {
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
      *
-     * @param callback
+     * @param callback {() => void} Callback function to be called when unload is complete
      */
     onUnload(callback) {
         try {
@@ -519,8 +523,8 @@ class KlipperMoonraker extends utils.Adapter {
     /**
      * Is called if a subscribed state changes
      *
-     * @param {string} id
-     * @param {ioBroker.State | null | undefined} state
+     * @param {string} id - ID of the state that changed
+     * @param {ioBroker.State | null | undefined} state - state object of the state that changed
      */
     async onStateChange(id, state) {
         //Only execute when ACK = false
@@ -712,13 +716,24 @@ class KlipperMoonraker extends utils.Adapter {
             // Set value to state including expiration time
             if (value !== null && value !== undefined) {
                 // Check if value should be rounded, if yes execute
-                if (typeof value == 'number' || typeof value == 'string') {
+                if (typeof value === 'string') {
+                    const parsed = parseFloat(value);
+                    if (Number.isNaN(parsed)) {
+                        this.log.warn(`Cannot round non-numeric string "${value}"`);
+                    } else {
+                        value = parsed.toString();
+                    }
+                }
+                if (typeof value === 'number') {
                     if (roundingOneDigit) {
-                        value = rondOneDigit(value, this);
+                        const roundedValue = rondOneDigit(value, this);
+                        value = roundedValue !== undefined ? roundedValue.toString() : value;
                     } else if (roundingTwoDigits) {
-                        value = roundTwoDigits(value, this);
+                        const roundedValue = roundTwoDigits(value, this);
+                        value = roundedValue !== undefined ? roundedValue.toString() : value;
                     } else if (roundingThreeDigits) {
-                        value = roundThreeDigits(value, this);
+                        const roundedValue = roundThreeDigits(value, this);
+                        value = roundedValue !== undefined ? roundedValue.toString() : value;
                     }
                 }
                 await this.setStateChangedAsync(createStateName, {
@@ -779,7 +794,7 @@ class KlipperMoonraker extends utils.Adapter {
 if (require.main !== module) {
     // Export the constructor in compact mode
     /**
-     * @param {Partial<utils.AdapterOptions>} [options]
+     * @param {Partial<utils.AdapterOptions>} [options] - Adapter options to configure the instance.
      */
     module.exports = options => new KlipperMoonraker(options);
 } else {

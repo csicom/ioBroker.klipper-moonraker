@@ -65,6 +65,13 @@
       "type": "password",
       "default": "",
       "hidden": "!data.auth"
+    },
+    "useSpoolman": {
+      "newLine": true,
+      "label": "Use Spoolman",
+      "type": "checkbox",
+      "default": false,
+      "help": "Enable if you use the Spoolman plugin to manage filaments"
     }
   }
 }
