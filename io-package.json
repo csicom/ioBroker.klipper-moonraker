@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "klipper-moonraker",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "news": {
+      "0.1.2": {
+        "en": "add useSpoolman configuration option",
+        "de": "verwendenSpoolman Konfigurationsoption",
+        "ru": "добавить опцию конфигурации UseSpoolman",
+        "pt": "adicionar a opção de configuração useSpoolman",
+        "nl": "useSpoolman configuratie-optie toevoegen",
+        "fr": "ajouter l'option de configuration useSpoolman",
+        "it": "aggiungere l'opzione di configurazione useSpoolman",
+        "es": "añadir la opción de configuración de useSpoolman",
+        "pl": "dodaj opcję konfiguracji Spoolman",
+        "uk": "add useSpoolman налаштування опція",
+        "zh-cn": "添加使用Spoolman 配置选项"
+      },
       "0.1.1": {
         "en": "(@foxriver76) detect stale connections",
         "de": "(@foxriver76) verbindungen erkennen",
