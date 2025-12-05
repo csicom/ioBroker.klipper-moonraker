@@ -213,7 +213,7 @@ class KlipperMoonraker extends utils.Adapter {
         });
 
         // Reagiere auf Pong-Antworten vom Server
-        ws.on('info', () => {
+        ws.on('pong', () => {
             this.log.debug('Pong received from server');
         });
 
