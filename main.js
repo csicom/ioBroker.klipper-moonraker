@@ -194,7 +194,7 @@ class KlipperMoonraker extends utils.Adapter {
 
         /** Check that we receive a ping request in time */
         const heartbeat = () => {
-            this.log.debug(JSON.stringify(this.pingTimeout));
+            this.log.info(JSON.stringify(this.pingTimeout));
             if (this.pingTimeout !== undefined) {
                 this.clearTimeout(this.pingTimeout);
             }
