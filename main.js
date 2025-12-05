@@ -197,7 +197,7 @@ class KlipperMoonraker extends utils.Adapter {
             if (this.pingTimeout !== undefined) {
                 this.clearTimeout(this.pingTimeout);
             }
-            this.log.debug('Heartbeat - sending ping');
+            this.log.info('Heartbeat - sending ping');
 
             // Sende aktiv einen Ping
             ws.ping();
@@ -215,7 +215,7 @@ class KlipperMoonraker extends utils.Adapter {
         });
 
         // Reagiere auf Pong-Antworten vom Server
-        ws.on('pong', () => {
+        ws.on('info', () => {
             this.log.debug('Pong received from server');
         });
 
